@@ -1,0 +1,24 @@
+# Docker Compose override for development
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+version: '3.8'
+
+services:
+  pto-planner:
+    build:
+      context: .
+      target: server-build
+    volumes:
+      # Override for live code changes
+      - ./server:/app/server
+      - ./client/dist:/app/client
+      - pto-data:/data
+      # Prevent node_modules from being overridden
+      - /app/server/node_modules
+    environment:
+      - NODE_ENV=development
+      - JWT_SECRET=dev-secret-key-not-for-production
+    command: ["sh", "-c", "cd /app/server && npm run dev"]
+    ports:
+      - "8090:80"
+      - "3000:3000"  # Expose API directly in dev mode

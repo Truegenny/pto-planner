@@ -1,0 +1,59 @@
+# Node.js
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+client/node_modules
+server/node_modules
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Environment and secrets
+.env
+.env.*
+*.env
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Documentation and non-essential files
+README.md
+LICENSE
+*.md
+docs/
+
+# Build artifacts (keeping dist in client for multi-stage build)
+.cache
+coverage
+.nyc_output
+
+# Docker files (no need in context)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Logs
+logs
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
