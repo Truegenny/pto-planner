@@ -1,5 +1,4 @@
 # Stage 1: Build React app
-# Use debian-slim for build stages — alpine's musl causes OOM (exit 139) on low-memory hosts
 FROM node:20-slim AS client-build
 WORKDIR /build
 COPY client/package.json ./
@@ -14,27 +13,26 @@ WORKDIR /build
 COPY server/package.json ./
 RUN npm install --production --no-audit --no-fund --maxsockets 5
 
-# Stage 3: Final runtime image (alpine is fine here — no npm install)
-FROM node:20-alpine
+# Stage 3: Final runtime image — use slim throughout to avoid alpine musl OOM
+FROM node:20-slim
 
-RUN apk add --no-cache nginx wget dumb-init
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    nginx wget dumb-init \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN addgroup -g 1001 -S appuser && \
-    adduser -u 1001 -S appuser -G appuser
+RUN groupadd -g 1001 appuser && \
+    useradd -u 1001 -g appuser -s /bin/sh -m appuser
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
-RUN mkdir -p /app/client /app/server /data /var/lib/nginx/logs /var/log/nginx && \
-    chown -R appuser:appuser /app /data /var/lib/nginx /var/log/nginx /run
+RUN mkdir -p /app/client /app/server /data /var/log/nginx /var/lib/nginx/body && \
+    chown -R appuser:appuser /app /data /var/log/nginx /var/lib/nginx /run
 
 COPY --from=client-build --chown=appuser:appuser /build/dist /app/client
 
 WORKDIR /app/server
 COPY --from=server-build --chown=appuser:appuser /build/node_modules ./node_modules
 COPY --chown=appuser:appuser server/ ./
-
-RUN node /app/server/data/generateWeather.js && \
-    chown -R appuser:appuser /app/server/data
 
 RUN chmod +x /app/server/entrypoint.sh
 
