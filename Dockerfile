@@ -1,23 +1,25 @@
 # Stage 1: Build React app (needs devDependencies for Vite)
 FROM node:20-alpine AS client-build
 WORKDIR /build
+ENV NODE_OPTIONS="--max-old-space-size=512"
 COPY client/package.json ./
-RUN npm install
+RUN npm install --no-audit --no-fund
 COPY client/ ./
 RUN npm run build
 
 # Stage 2: Install server dependencies (production only)
+# better-sqlite3 requires build tools for native compilation on alpine
 FROM node:20-alpine AS server-build
+RUN apk add --no-cache python3 make g++
 WORKDIR /build
 COPY server/package.json ./
-RUN npm install --production
+RUN npm install --production --no-audit --no-fund
 
 # Stage 3: Final image
 FROM node:20-alpine
 
 # Install runtime dependencies
-RUN apk add --no-cache nginx wget dumb-init \
-    && rm -rf /var/cache/apk/*
+RUN apk add --no-cache nginx wget dumb-init
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S appuser && \

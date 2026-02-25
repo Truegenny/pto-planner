@@ -1,13 +1,9 @@
-version: '3.8'
-
 services:
   pto-planner:
     build:
       context: .
       dockerfile: Dockerfile
-    image: pto-planner:latest
     container_name: pto-planner
-    hostname: pto-planner
     ports:
       - "8090:8080"
     volumes:
@@ -24,38 +20,12 @@ services:
       timeout: 5s
       retries: 3
       start_period: 15s
-    networks:
-      - pto-network
-    labels:
-      # Portainer stack management labels
-      com.portainer.stack.name: "pto-planner"
-      com.portainer.app.description: "PTO Planner - Vacation planning application with AI chat"
-      com.portainer.app.version: "1.0.0"
-      # Application metadata
-      app.name: "pto-planner"
-      app.component: "web"
-      app.environment: "production"
-      # Traefik labels (optional, for reverse proxy integration)
-      traefik.enable: "true"
-      traefik.http.routers.pto-planner.rule: "Host(`pto-planner.local`)"
-      traefik.http.services.pto-planner.loadbalancer.server.port: "8080"
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
-    stop_grace_period: 30s
 
 volumes:
   pto-data:
     driver: local
-    labels:
-      com.portainer.stack.name: "pto-planner"
-      app.name: "pto-planner"
-      app.data.type: "database"
-
-networks:
-  pto-network:
-    driver: bridge
-    labels:
-      com.portainer.stack.name: "pto-planner"
